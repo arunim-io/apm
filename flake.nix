@@ -14,12 +14,7 @@
     perSystem = { pkgs, system, config, ... }: {
       packages = {
         abar = config.packages.default;
-        default = with pkgs; rustPlatform.buildRustPackage {
-          pname = "abar";
-          version = "0.1.o";
-          cargoLock.lockFile = ./Cargo.lock;
-          src = lib.cleanSource ./.;
-        };
+        default = pkgs.callPackage ./default.nix { };
       };
       devShells.default = with pkgs; mkShell {
         inputsFrom = [ config.packages.default ];
