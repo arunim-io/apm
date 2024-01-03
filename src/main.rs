@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use gtk::{self, gdk, glib, prelude::*};
 use gtk_layer_shell::{Edge, LayerShell};
 
@@ -5,6 +7,17 @@ fn main() -> glib::ExitCode {
     let app = gtk::Application::builder()
         .application_id("dev.github.arunim-io.apm")
         .build();
+
+    app.connect_startup(|_| {
+        let provider = gtk::CssProvider::new();
+        provider.load_from_path(Path::new("examples/styles.css"));
+
+        gtk::style_context_add_provider_for_display(
+            &gdk::Display::default().expect("Could not connect to a display."),
+            &provider,
+            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+        );
+    });
 
     app.connect_activate(|app| {
         let window = gtk::ApplicationWindow::new(app);
@@ -34,4 +47,3 @@ fn main() -> glib::ExitCode {
 
     app.run()
 }
-
