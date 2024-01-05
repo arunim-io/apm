@@ -61,6 +61,10 @@ fn main() -> glib::ExitCode {
             button.set_valign(gtk::Align::Center);
             button.set_child(Some(&container));
 
+            button.connect_clicked(|_| {
+                println!("Button clicked.");
+            });
+
             list.append(&button);
         }
 
