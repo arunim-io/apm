@@ -3,8 +3,6 @@ use std::path::Path;
 use gtk::{self, gdk, glib, prelude::*};
 use gtk_layer_shell::{Edge, LayerShell};
 
-static GAPS: i32 = 25;
-
 fn main() -> glib::ExitCode {
     let app = gtk::Application::builder()
         .application_id("dev.github.arunim-io.apm")
@@ -42,19 +40,28 @@ fn main() -> glib::ExitCode {
             window.set_anchor(edge, true);
         }
 
-        let list = gtk::Box::new(gtk::Orientation::Horizontal, GAPS);
+        let list = gtk::Box::new(gtk::Orientation::Horizontal, 25);
         list.set_halign(gtk::Align::Center);
         for i in vec![1, 2, 3] {
             let label = gtk::Label::new(Some(&i.to_string()));
             let icon = gtk::Image::from_file(Path::new("examples/shutdown.png"));
+            icon.set_width_request(100);
+            icon.set_height_request(100);
 
-            let container = gtk::Box::new(gtk::Orientation::Vertical, 10);
+            let container = gtk::Box::new(gtk::Orientation::Vertical, 25);
             container.set_valign(gtk::Align::Center);
-
             container.append(&icon);
             container.append(&label);
+            container.set_margin_top(50);
+            container.set_margin_end(50);
+            container.set_margin_start(50);
+            container.set_margin_bottom(50);
 
-            list.append(&container);
+            let button = gtk::Button::new();
+            button.set_valign(gtk::Align::Center);
+            button.set_child(Some(&container));
+
+            list.append(&button);
         }
 
         window.set_child(Some(&list));
