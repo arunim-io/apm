@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use gtk::{self, gdk, glib, prelude::*};
-use gtk_layer_shell::{Edge, LayerShell};
+use gtk_layer_shell::{self, Edge, LayerShell};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -38,6 +38,7 @@ fn main() -> glib::ExitCode {
 
     app.connect_activate(move |app| {
         let window = gtk::ApplicationWindow::new(app);
+        let config = config.clone();
 
         window.init_layer_shell();
         window.set_layer(gtk_layer_shell::Layer::Overlay);
@@ -62,7 +63,7 @@ fn main() -> glib::ExitCode {
             .halign(gtk::Align::Center)
             .build();
 
-        config.clone().buttons.into_iter().for_each(|data| {
+        config.buttons.into_iter().for_each(|data| {
             let label = gtk::Label::new(Some(&data.label));
             let icon = gtk::Image::builder()
                 .file(data.icon)
@@ -70,7 +71,7 @@ fn main() -> glib::ExitCode {
                 .height_request(100)
                 .build();
 
-            let container = gtk::Box::builder()
+            let content = gtk::Box::builder()
                 .orientation(gtk::Orientation::Vertical)
                 .spacing(25)
                 .valign(gtk::Align::Center)
@@ -79,14 +80,15 @@ fn main() -> glib::ExitCode {
                 .margin_start(50)
                 .margin_bottom(50)
                 .build();
-            container.append(&icon);
-            container.append(&label);
+            content.append(&icon);
+            content.append(&label);
 
             let button = gtk::Button::builder()
                 .valign(gtk::Align::Center)
-                .child(&container)
+                .child(&content)
                 .build();
             button.connect_clicked(move |_| println!("{}", data.cmd));
+
             container.append(&button);
         });
 
