@@ -13,6 +13,8 @@ struct Config {
 struct Button {
     label: String,
     icon: String,
+    cmd: String,
+    keybind: String,
 }
 
 fn main() -> glib::ExitCode {
@@ -60,9 +62,12 @@ fn activate(config: Config) -> impl Fn(&gtk::Application) {
         for edge in vec![Edge::Top, Edge::Bottom, Edge::Left, Edge::Right] {
             window.set_anchor(edge, true);
         }
-        let container = gtk::Box::new(gtk::Orientation::Horizontal, 25);
+        let container = gtk::Box::builder()
+            .orientation(gtk::Orientation::Horizontal)
+            .spacing(25)
+            .halign(gtk::Align::Center)
+            .build();
 
-        container.set_halign(gtk::Align::Center);
         config
             .clone()
             .buttons
@@ -74,26 +79,31 @@ fn activate(config: Config) -> impl Fn(&gtk::Application) {
     }
 }
 
-fn get_button(button: Button) -> gtk::Button {
-    let label = gtk::Label::new(Some(&button.label));
-    let icon = gtk::Image::from_file(Path::new(&button.icon));
-    icon.set_width_request(100);
-    icon.set_height_request(100);
+fn get_button(data: Button) -> gtk::Button {
+    let label = gtk::Label::new(Some(&data.label));
+    let icon = gtk::Image::builder()
+        .file(data.icon)
+        .width_request(100)
+        .height_request(100)
+        .build();
 
-    let container = gtk::Box::new(gtk::Orientation::Vertical, 25);
-    container.set_valign(gtk::Align::Center);
-    container.set_margin_top(50);
-    container.set_margin_end(50);
-    container.set_margin_start(50);
-    container.set_margin_bottom(50);
+    let container = gtk::Box::builder()
+        .orientation(gtk::Orientation::Vertical)
+        .spacing(25)
+        .valign(gtk::Align::Center)
+        .margin_top(50)
+        .margin_end(50)
+        .margin_start(50)
+        .margin_bottom(50)
+        .build();
     container.append(&icon);
     container.append(&label);
 
-    let button = gtk::Button::new();
-    button.set_valign(gtk::Align::Center);
-    button.set_child(Some(&container));
-
-    button.connect_clicked(|_| println!("Button clicked."));
+    let button = gtk::Button::builder()
+        .valign(gtk::Align::Center)
+        .child(&container)
+        .build();
+    button.connect_clicked(move |_| println!("{}", data.cmd));
 
     return button;
 }
