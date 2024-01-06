@@ -37,18 +37,25 @@ fn main() -> glib::ExitCode {
     });
 
     app.connect_activate(move |app| {
+        let buttons = config.clone().buttons;
         let window = gtk::ApplicationWindow::new(app);
-        let config = config.clone();
 
         window.init_layer_shell();
         window.set_layer(gtk_layer_shell::Layer::Overlay);
         window.set_exclusive_zone(-1);
 
         let controller = gtk::EventControllerKey::new();
-        controller.connect_key_pressed(|_, key, _, _| {
+        controller.connect_key_pressed(move |_, key, _, _| {
             if let gdk::Key::Escape = key {
                 std::process::exit(0);
             }
+            buttons.clone().into_iter().for_each(|button| {
+                let keybind = gdk::Key::from_name(&button.keybind).unwrap();
+                if keybind == key {
+                    println!("{}", keybind);
+                    std::process::exit(0);
+                }
+            });
             glib::Propagation::Proceed
         });
         window.add_controller(controller);
@@ -63,7 +70,7 @@ fn main() -> glib::ExitCode {
             .halign(gtk::Align::Center)
             .build();
 
-        config.buttons.into_iter().for_each(|data| {
+        config.buttons.clone().into_iter().for_each(|data| {
             let label = gtk::Label::new(Some(&data.label));
             let icon = gtk::Image::builder()
                 .file(data.icon)
