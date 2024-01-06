@@ -2,13 +2,28 @@ use std::path::Path;
 
 use gtk::{self, gdk, glib, prelude::*};
 use gtk_layer_shell::{Edge, LayerShell};
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Serialize, Deserialize)]
+struct Config {
+    buttons: Vec<Button>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+struct Button {
+    label: String,
+    icon: String,
+}
 
 fn main() -> glib::ExitCode {
+    let path = std::fs::read_to_string("examples/config.toml").unwrap();
+    let config: Config = toml::from_str(&path).unwrap();
+
     let app = gtk::Application::builder()
         .application_id("dev.github.arunim-io.apm")
         .build();
 
-    app.connect_activate(activate);
+    app.connect_activate(activate(config));
     app.connect_startup(startup);
     app.run()
 }
@@ -24,48 +39,44 @@ fn startup(_app: &gtk::Application) {
     );
 }
 
-fn activate(app: &gtk::Application) {
-    let window = gtk::ApplicationWindow::new(app);
+fn activate(config: Config) -> impl Fn(&gtk::Application) {
+    move |app| {
+        let window = gtk::ApplicationWindow::new(app);
 
-    window.init_layer_shell();
-    window.set_layer(gtk_layer_shell::Layer::Overlay);
-    window.set_exclusive_zone(-1);
+        window.init_layer_shell();
+        window.set_layer(gtk_layer_shell::Layer::Overlay);
+        window.set_exclusive_zone(-1);
 
-    let controller = gtk::EventControllerKey::new();
-    controller.connect_key_pressed(|_, key, _, _| {
-        if let gdk::Key::Escape = key {
-            std::process::exit(0);
+        let controller = gtk::EventControllerKey::new();
+        controller.connect_key_pressed(|_, key, _, _| {
+            if let gdk::Key::Escape = key {
+                std::process::exit(0);
+            }
+            glib::Propagation::Proceed
+        });
+        window.add_controller(controller);
+        window.set_fullscreened(true);
+        window.set_keyboard_mode(gtk_layer_shell::KeyboardMode::Exclusive);
+        for edge in vec![Edge::Top, Edge::Bottom, Edge::Left, Edge::Right] {
+            window.set_anchor(edge, true);
         }
-        glib::Propagation::Proceed
-    });
-    window.add_controller(controller);
-    window.set_fullscreened(true);
-    window.set_keyboard_mode(gtk_layer_shell::KeyboardMode::Exclusive);
-    for edge in vec![Edge::Top, Edge::Bottom, Edge::Left, Edge::Right] {
-        window.set_anchor(edge, true);
-    }
+        let container = gtk::Box::new(gtk::Orientation::Horizontal, 25);
 
-    window.set_child(Some(&get_root_widget()));
-    window.present();
+        container.set_halign(gtk::Align::Center);
+        config
+            .clone()
+            .buttons
+            .into_iter()
+            .for_each(|button| container.append(&get_button(button)));
+
+        window.set_child(Some(&container));
+        window.present();
+    }
 }
 
-fn get_root_widget() -> gtk::Box {
-    let widget = gtk::Box::new(gtk::Orientation::Horizontal, 25);
-
-    widget.set_halign(gtk::Align::Center);
-    for i in vec![1, 2, 3] {
-        widget.append(&get_button(
-            &i.to_string(),
-            Path::new("examples/shutdown.png"),
-        ));
-    }
-
-    return widget;
-}
-
-fn get_button(i: &str, icon_path: impl AsRef<Path>) -> gtk::Button {
-    let label = gtk::Label::new(Some(i));
-    let icon = gtk::Image::from_file(icon_path);
+fn get_button(button: Button) -> gtk::Button {
+    let label = gtk::Label::new(Some(&button.label));
+    let icon = gtk::Image::from_file(Path::new(&button.icon));
     icon.set_width_request(100);
     icon.set_height_request(100);
 
@@ -82,9 +93,7 @@ fn get_button(i: &str, icon_path: impl AsRef<Path>) -> gtk::Button {
     button.set_valign(gtk::Align::Center);
     button.set_child(Some(&container));
 
-    button.connect_clicked(|_| {
-        println!("Button clicked.");
-    });
+    button.connect_clicked(|_| println!("Button clicked."));
 
     return button;
 }

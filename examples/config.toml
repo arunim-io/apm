@@ -1,0 +1,11 @@
+[[buttons]]
+label = "Poweroff"
+icon = "examples/shutdown.png"
+
+[[buttons]]
+label = "Reboot"
+icon = "examples/shutdown.png"
+
+[[buttons]]
+label = "Sleep"
+icon = "examples/shutdown.png"
