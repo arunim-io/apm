@@ -1,4 +1,7 @@
-use std::{path::Path, process::Command};
+use std::{
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 use gtk::{self, gdk, glib, prelude::*};
 use gtk_layer_shell::{self, Edge, LayerShell};
@@ -11,9 +14,27 @@ struct Config {
 }
 
 impl Config {
-    fn read_from_path(path: &str) -> Self {
+    fn get_file_path(file_name: &str) -> PathBuf {
+        let config_dir = xdg::BaseDirectories::with_prefix("acw").unwrap();
+        return config_dir.get_config_file(file_name);
+    }
+    fn read_from_path(path: impl AsRef<Path>) -> Self {
         let file = std::fs::read_to_string(path).expect("Unable to read config file");
         return toml::from_str::<Self>(&file).expect("Unable to parse config file");
+    }
+    fn open() -> Self {
+        if cfg!(debug_assertions) {
+            return Self::read_from_path("examples/config.toml");
+        }
+        let path = Self::get_file_path("config.toml");
+
+        return Self::read_from_path(path);
+    }
+    fn get_styles_path() -> PathBuf {
+        if cfg!(debug_assertions) {
+            return Path::new("examples/styles.css").to_path_buf();
+        }
+        return Self::get_file_path("styles.css");
     }
 }
 
@@ -88,7 +109,7 @@ impl Button {
 }
 
 fn main() -> glib::ExitCode {
-    let config = Config::read_from_path("examples/config.toml");
+    let config = Config::open();
 
     let app = gtk::Application::builder()
         .application_id("dev.github.arunim-io.apm")
@@ -96,7 +117,7 @@ fn main() -> glib::ExitCode {
 
     app.connect_startup(|_| {
         let provider = gtk::CssProvider::new();
-        provider.load_from_path(Path::new("examples/styles.css"));
+        provider.load_from_path(Config::get_styles_path());
 
         gtk::style_context_add_provider_for_display(
             &gdk::Display::default().expect("Could not connect to a display."),

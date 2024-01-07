@@ -16,6 +16,7 @@ dependencies = [
  "gtk4-layer-shell",
  "serde",
  "toml",
+ "xdg",
 ]
 
 [[package]]
@@ -838,6 +839,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b7520bbdec7211caa7c4e682eb1fbe07abe20cee6756b6e00f537c82c11816aa"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "xdg"
+version = "2.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "213b7324336b53d2414b2db8537e56544d981803139155afa84f76eeebb7a546"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
