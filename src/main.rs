@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{path::Path, process::Command};
 
 use gtk::{self, gdk, glib, prelude::*};
 use gtk_layer_shell::{self, Edge, LayerShell};
@@ -17,9 +17,22 @@ struct Button {
     keybind: String,
 }
 
+impl Button {
+    fn get_key(self) -> gdk::Key {
+        return gdk::Key::from_name(self.keybind).expect("Invalid Keybind!");
+    }
+    fn exec_cmd(self) {
+        Command::new("sh")
+            .args(["-c", &self.cmd])
+            .output()
+            .expect("Unable to run command");
+        std::process::exit(0);
+    }
+}
+
 fn main() -> glib::ExitCode {
-    let path = std::fs::read_to_string("examples/config.toml").unwrap();
-    let config: Config = toml::from_str(&path).unwrap();
+    let path = std::fs::read_to_string("examples/config.toml").expect("Unable to read config file");
+    let config: Config = toml::from_str(&path).expect("Unable to parse config file");
 
     let app = gtk::Application::builder()
         .application_id("dev.github.arunim-io.apm")
@@ -50,10 +63,8 @@ fn main() -> glib::ExitCode {
                 std::process::exit(0);
             }
             buttons.clone().into_iter().for_each(|button| {
-                let keybind = gdk::Key::from_name(&button.keybind).unwrap();
-                if keybind == key {
-                    println!("{}", keybind);
-                    std::process::exit(0);
+                if button.clone().get_key() == key {
+                    button.exec_cmd();
                 }
             });
             glib::Propagation::Proceed
@@ -73,7 +84,7 @@ fn main() -> glib::ExitCode {
         config.buttons.clone().into_iter().for_each(|data| {
             let label = gtk::Label::new(Some(&data.label));
             let icon = gtk::Image::builder()
-                .file(data.icon)
+                .file(&data.icon)
                 .width_request(100)
                 .height_request(100)
                 .build();
@@ -94,7 +105,7 @@ fn main() -> glib::ExitCode {
                 .valign(gtk::Align::Center)
                 .child(&content)
                 .build();
-            button.connect_clicked(move |_| println!("{}", data.cmd));
+            button.connect_clicked(move |_| data.clone().exec_cmd());
 
             container.append(&button);
         });

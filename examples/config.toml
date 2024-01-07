@@ -13,5 +13,5 @@ keybind = "r"
 [[buttons]]
 label = "Lock"
 icon = "examples/shutdown.png"
-cmd = "echo 'Implement locking'"
+cmd = "wezterm"
 keybind = "l"
