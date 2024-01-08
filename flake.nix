@@ -17,18 +17,16 @@
     extra-trusted-public-keys = [ "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" ];
   };
 
-  outputs = inputs@{ flake-parts, systems, nixpkgs, ... }: flake-parts.lib.mkFlake { inherit inputs; } {
-    systems = import systems;
+  outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+    systems = import inputs.systems;
 
     perSystem = { pkgs, system, config, inputs', ... }:
       let
         inherit (inputs'.fenix.packages.complete) cargo rustc rust-src;
       in
       {
-        packages = {
-          abar = config.packages.default;
-          default = pkgs.callPackage ./default.nix { rustPlatform = pkgs.makeRustPlatform { inherit cargo rustc; }; };
-        };
+        packages.default = pkgs.callPackage ./default.nix { rustPlatform = pkgs.makeRustPlatform { inherit cargo rustc; }; };
+
         devShells.default = with pkgs; mkShell {
           inputsFrom = [ config.packages.default ];
           RUST_SRC_PATH = "${rust-src}/lib/rustlib/src/rust/library";
