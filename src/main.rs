@@ -14,8 +14,11 @@ struct Config {
 }
 
 impl Config {
+    fn get_dir() -> xdg::BaseDirectories {
+        return xdg::BaseDirectories::with_prefix("acw").unwrap();
+    }
     fn get_file_path(file_name: &str) -> PathBuf {
-        let config_dir = xdg::BaseDirectories::with_prefix("acw").unwrap();
+        let config_dir = Self::get_dir();
         return config_dir.get_config_file(file_name);
     }
     fn read_from_path(path: impl AsRef<Path>) -> Self {
@@ -23,17 +26,9 @@ impl Config {
         return toml::from_str::<Self>(&file).expect("Unable to parse config file");
     }
     fn open() -> Self {
-        if cfg!(debug_assertions) {
-            return Self::read_from_path("examples/config.toml");
-        }
-        let path = Self::get_file_path("config.toml");
-
-        return Self::read_from_path(path);
+        return Self::read_from_path(Self::get_file_path("config.toml"));
     }
     fn get_styles_path() -> PathBuf {
-        if cfg!(debug_assertions) {
-            return Path::new("examples/styles.css").to_path_buf();
-        }
         return Self::get_file_path("styles.css");
     }
 }
@@ -107,15 +102,12 @@ impl Button {
         return (height, width);
     }
     fn get_icon_path(self) -> PathBuf {
-        let path = Path::new(&self.icon);
+        let path = Config::get_file_path(&self.icon);
 
         if !path.try_exists().unwrap() {
             return shellexpand::path::tilde(&self.icon).to_path_buf();
         }
-        if cfg!(debug_assertions) {
-            return path.to_path_buf();
-        }
-        return Config::get_file_path(&self.icon);
+        return path;
     }
 }
 

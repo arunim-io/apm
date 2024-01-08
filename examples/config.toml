@@ -10,7 +10,7 @@ icon_size = 25
 
 [[buttons]]
 label = "Reboot"
-icon = "examples/shutdown.png"
+icon = "./icons/shutdown.png"
 cmd = "systemctl reboot"
 keybind = "r"
 padding_x = 40
@@ -19,7 +19,7 @@ icon_width = 25
 
 [[buttons]]
 label = "Lock"
-icon = "examples/shutdown.png"
+icon = "icons/shutdown.png"
 cmd = "wezterm"
 keybind = "l"
 padding_left = 50
