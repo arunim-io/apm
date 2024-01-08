@@ -106,6 +106,12 @@ impl Button {
 
         return (height, width);
     }
+    fn get_icon_path(self) -> PathBuf {
+        if cfg!(debug_assertions) {
+            return Path::new(&self.icon).to_path_buf();
+        }
+        return Config::get_file_path(&self.icon);
+    }
 }
 
 fn main() -> glib::ExitCode {
@@ -162,7 +168,7 @@ fn main() -> glib::ExitCode {
             let label = gtk::Label::new(Some(&data.label));
             let (height, width) = data.clone().get_icon_size();
             let icon = gtk::Image::builder()
-                .file(&data.icon)
+                .file(data.clone().get_icon_path().to_string_lossy())
                 .width_request(height)
                 .height_request(width)
                 .build();
