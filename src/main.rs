@@ -7,7 +7,7 @@ use gtk::{self, gdk, glib, prelude::*};
 use gtk_layer_shell::{self, Edge, LayerShell};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct Config {
     buttons: Vec<Button>,
     spacing: Option<i32>,
@@ -33,7 +33,7 @@ impl Config {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 struct Button {
     label: String,
     icon: String,
@@ -155,10 +155,12 @@ fn main() -> glib::ExitCode {
         for edge in vec![Edge::Top, Edge::Bottom, Edge::Left, Edge::Right] {
             window.set_anchor(edge, true);
         }
+
         let container = gtk::Box::builder()
             .orientation(gtk::Orientation::Horizontal)
             .spacing(config.spacing.unwrap_or(25))
             .halign(gtk::Align::Center)
+            .valign(gtk::Align::Center)
             .build();
 
         config.buttons.clone().into_iter().for_each(|data| {
@@ -175,6 +177,7 @@ fn main() -> glib::ExitCode {
                 .orientation(gtk::Orientation::Vertical)
                 .spacing(25)
                 .valign(gtk::Align::Center)
+                .halign(gtk::Align::Center)
                 .margin_top(top)
                 .margin_end(right)
                 .margin_start(left)
@@ -185,6 +188,7 @@ fn main() -> glib::ExitCode {
 
             let button = gtk::Button::builder()
                 .valign(gtk::Align::Center)
+                .halign(gtk::Align::Center)
                 .child(&content)
                 .build();
             button.connect_clicked(move |_| data.clone().exec_cmd());
