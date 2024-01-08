@@ -2,7 +2,7 @@ spacing = 25
 
 [[buttons]]
 label = "Poweroff"
-icon = "examples/shutdown.png"
+icon = "~/coding/acw/examples/shutdown.png"
 cmd = "systemctl poweroff"
 keybind = "p"
 padding = 50

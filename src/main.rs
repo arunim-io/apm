@@ -107,8 +107,13 @@ impl Button {
         return (height, width);
     }
     fn get_icon_path(self) -> PathBuf {
+        let path = Path::new(&self.icon);
+
+        if !path.try_exists().unwrap() {
+            return shellexpand::path::tilde(&self.icon).to_path_buf();
+        }
         if cfg!(debug_assertions) {
-            return Path::new(&self.icon).to_path_buf();
+            return path.to_path_buf();
         }
         return Config::get_file_path(&self.icon);
     }
