@@ -1,0 +1,10 @@
+[[buttons]]
+icon = "icons/poweroff.png"
+[[buttons]]
+icon = "icons/reboot.png"
+[[buttons]]
+icon = "icons/lock.png"
+[[buttons]]
+icon = "icons/sleep.png"
+[[buttons]]
+icon = "icons/logout.png"

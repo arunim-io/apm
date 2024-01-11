@@ -8,13 +8,29 @@ window {
   color: #fff;
 }
 
+#container {
+  background-color: rgb(23, 23, 23);
+  color: white;
+  padding: 50px;
+  border: 1px solid white;
+  border-radius: 10px;
+}
+
 button {
-  background-color: black;
-  color: #fff;
+  background-color: white;
+}
+
+button img {
+  color: blue;
+}
+
+label {
+  background-color: white;
+  color: black;
+  border: 1px solid white;
+  border-radius: 10px;
 }
 
 button:focus,
 button:active,
-button:hover {
-  background-color: rgba(255, 255, 255, 0.5);
-}
+button:hover {}

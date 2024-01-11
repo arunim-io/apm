@@ -1,4 +1,4 @@
-use crate::config::{Button, Config};
+use crate::config::Config;
 use std::path::{Path, PathBuf};
 
 impl Config {
@@ -10,23 +10,15 @@ impl Config {
         return toml::from_str::<Self>(&file).expect("Unable to parse config file");
     }
     pub fn get_file_path(file_name: &str) -> PathBuf {
-        let config_dir = Self::get_dir();
-        return config_dir.get_config_file(file_name);
+        if let Some(path) = Self::get_dir().find_config_file(file_name) {
+            return path;
+        }
+        return Path::new(&format!("examples/{}", file_name)).to_path_buf();
     }
     pub fn open() -> Self {
         return Self::read_from_path(Self::get_file_path("config.toml"));
     }
     pub fn get_styles_path() -> PathBuf {
         return Self::get_file_path("styles.css");
-    }
-}
-impl Button {
-    pub fn get_icon_path(self) -> PathBuf {
-        let path = Config::get_file_path(&self.icon);
-
-        if !path.try_exists().unwrap() {
-            return shellexpand::path::tilde(&self.icon).to_path_buf();
-        }
-        return path;
     }
 }

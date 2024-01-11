@@ -8,7 +8,7 @@ pub struct Config {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Button {
-    pub label: String,
-    pub cmd: String,
+    pub label: Option<String>,
+    pub cmd: Option<String>,
     pub icon: String,
 }
