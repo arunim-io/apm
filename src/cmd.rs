@@ -9,7 +9,7 @@ impl Button {
                 .args(["-c", &cmd])
                 .output()
                 .expect("Unable to run command");
-            std::process::exit(0);
         }
+        std::process::exit(0);
     }
 }

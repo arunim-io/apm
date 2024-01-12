@@ -3,19 +3,24 @@ spacing = 50
 [[buttons]]
 icon = "icons/poweroff.png"
 label = "Power Off"
+key = "p"
 
 [[buttons]]
 icon = "icons/reboot.png"
 label = "Reboot"
+key = "r"
 
 [[buttons]]
 icon = "icons/lock.png"
 label = "Lock"
+key = "l"
 
 [[buttons]]
 icon = "icons/sleep.png"
 label = "Sleep"
+key = "s"
 
 [[buttons]]
 icon = "icons/logout.png"
 label = "Logout"
+key = "q"

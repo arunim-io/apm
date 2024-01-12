@@ -42,21 +42,14 @@ fn activate(config: Config) -> impl Fn(&gtk::Application) {
             window.set_anchor(edge, true);
         }
 
-        let controller = gtk::EventControllerKey::new();
-        controller.connect_key_pressed(move |_, key, _, _| {
-            if let Key::Q | Key::q | Key::Escape = key {
-                std::process::exit(0);
-            }
-            glib::Propagation::Proceed
-        });
-        window.add_controller(controller);
+        window.add_controller(get_controller(config.clone().buttons));
+        window.set_child(get_container(&config).as_ref());
 
-        window.set_child(Some(&get_container(&config)));
         window.present();
     }
 }
 
-fn get_container(config: &Config) -> gtk::Box {
+fn get_container(config: &Config) -> Option<gtk::Box> {
     let container = gtk::Box::builder()
         .name("container")
         .orientation(Orientation::Horizontal)
@@ -69,10 +62,36 @@ fn get_container(config: &Config) -> gtk::Box {
         container.append(&button.get_widget(config.icon_size, config.icon_margin));
     });
 
-    return container;
+    return Some(container);
+}
+
+fn get_controller(buttons: Vec<config::Button>) -> gtk::EventControllerKey {
+    let controller = gtk::EventControllerKey::new();
+
+    controller.connect_key_pressed(move |_, key, _, _| {
+        if let Key::Escape = key {
+            std::process::exit(0);
+        }
+
+        buttons.to_owned().into_iter().for_each(|button| {
+            if button.clone().get_key() == key {
+                button.clone().exec_cmd();
+            }
+        });
+
+        glib::Propagation::Proceed
+    });
+
+    return controller;
 }
 
 impl config::Button {
+    fn get_key(self) -> Key {
+        let err_msg = format!("Invalid key for {} button.", self.label);
+        let key = self.key.expect(&err_msg);
+
+        return Key::from_name(key).expect(&err_msg);
+    }
     fn get_widget(self, icon_size: Option<i32>, icon_margin: Option<i32>) -> gtk::Box {
         let label = self.label.as_str();
         let container = gtk::Box::builder()
