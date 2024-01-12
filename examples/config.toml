@@ -1,10 +1,19 @@
 [[buttons]]
 icon = "icons/poweroff.png"
+label = "poweroff"
+
 [[buttons]]
 icon = "icons/reboot.png"
+label = "reboot"
+
 [[buttons]]
 icon = "icons/lock.png"
+label = "lock"
+
 [[buttons]]
 icon = "icons/sleep.png"
+label = "sleep"
+
 [[buttons]]
 icon = "icons/logout.png"
+label = "logout"

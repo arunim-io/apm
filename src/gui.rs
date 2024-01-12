@@ -1,15 +1,13 @@
-use crate::config::{self, Config};
-use gtk::gdk::{Display, Key};
-use gtk::glib::{ExitCode, Propagation};
-use gtk::{prelude::*, Image};
-use gtk::{
-    style_context_add_provider_for_display, Align, Application, ApplicationWindow, Box, Button,
-    CssProvider, EventControllerKey, Orientation, STYLE_PROVIDER_PRIORITY_APPLICATION,
-};
-use gtk_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
+use gtk::gdk::{self, Key};
+use gtk::glib;
+use gtk::prelude::*;
+use gtk::{Align, Orientation};
+use gtk_layer_shell::{Edge, LayerShell};
 
-pub fn run(config: Config) -> ExitCode {
-    let app = Application::builder()
+use crate::config::{self, Config};
+
+pub fn run(config: Config) -> glib::ExitCode {
+    let app = gtk::Application::builder()
         .application_id("dev.github.arunim-io.apm")
         .build();
 
@@ -19,37 +17,37 @@ pub fn run(config: Config) -> ExitCode {
     app.run()
 }
 
-fn startup() -> impl Fn(&Application) {
+fn startup() -> impl Fn(&gtk::Application) {
     |_| {
-        let provider = CssProvider::new();
+        let provider = gtk::CssProvider::new();
         provider.load_from_path(Config::get_styles_path());
 
-        style_context_add_provider_for_display(
-            &Display::default().expect("Could not connect to a display."),
+        gtk::style_context_add_provider_for_display(
+            &gdk::Display::default().expect("Could not connect to a display."),
             &provider,
-            STYLE_PROVIDER_PRIORITY_APPLICATION,
+            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
         );
     }
 }
 
-fn activate(config: Config) -> impl Fn(&Application) {
+fn activate(config: Config) -> impl Fn(&gtk::Application) {
     move |app| {
-        let window = ApplicationWindow::new(app);
+        let window = gtk::ApplicationWindow::new(app);
 
         window.init_layer_shell();
-        window.set_layer(Layer::Overlay);
+        window.set_layer(gtk_layer_shell::Layer::Overlay);
         window.set_exclusive_zone(-1);
-        window.set_keyboard_mode(KeyboardMode::Exclusive);
+        window.set_keyboard_mode(gtk_layer_shell::KeyboardMode::Exclusive);
         for edge in vec![Edge::Top, Edge::Bottom, Edge::Left, Edge::Right] {
             window.set_anchor(edge, true);
         }
 
-        let controller = EventControllerKey::new();
+        let controller = gtk::EventControllerKey::new();
         controller.connect_key_pressed(move |_, key, _, _| {
             if let Key::Q | Key::q | Key::Escape = key {
                 std::process::exit(0);
             }
-            Propagation::Proceed
+            glib::Propagation::Proceed
         });
         window.add_controller(controller);
 
@@ -58,36 +56,47 @@ fn activate(config: Config) -> impl Fn(&Application) {
     }
 }
 
-fn get_container(config: &Config) -> Box {
-    let container = Box::builder()
+fn get_container(config: &Config) -> gtk::Box {
+    let container = gtk::Box::builder()
         .name("container")
-        .orientation(Orientation::Vertical)
-        .halign(Align::BaselineCenter)
+        .orientation(Orientation::Horizontal)
+        .halign(Align::Center)
         .valign(Align::Center)
         .spacing(25)
         .build();
 
-    let list = Box::new(Orientation::Horizontal, 25);
-    config.to_owned().buttons.into_iter().for_each(|item| {
-        list.append(&get_button(item));
-    });
-    container.append(&list);
+    config
+        .to_owned()
+        .buttons
+        .into_iter()
+        .for_each(|button| container.append(&button.get_widget()));
 
     return container;
 }
 
-fn get_button(data: config::Button) -> Button {
-    let icon = Image::builder()
-        .file(Config::get_file_path(&data.icon).to_string_lossy())
-        .margin_end(10)
-        .margin_top(10)
-        .margin_start(10)
-        .margin_bottom(10)
-        .pixel_size(50)
-        .build();
+impl config::Button {
+    fn get_widget(self) -> gtk::Box {
+        let label = self.label.as_str();
+        let container = gtk::Box::builder()
+            .name(label)
+            .orientation(Orientation::Vertical)
+            .spacing(10)
+            .build();
+        let icon = gtk::Image::builder()
+            .file(Config::get_file_path(&self.icon).to_string_lossy())
+            .margin_end(10)
+            .margin_top(10)
+            .margin_start(10)
+            .margin_bottom(10)
+            .pixel_size(50)
+            .build();
 
-    let button = Button::builder().child(&icon).build();
-    button.add_css_class("circular");
+        let button = gtk::Button::builder().child(&icon).build();
+        button.add_css_class("circular");
 
-    return button;
+        container.append(&button);
+        container.append(&gtk::Label::new(Some(label)));
+
+        return container;
+    }
 }
