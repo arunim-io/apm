@@ -1,3 +1,4 @@
+use color_eyre::eyre::{ContextCompat, Result};
 use gtk::gdk::{self, Key};
 use gtk::glib;
 use gtk::prelude::*;
@@ -6,32 +7,24 @@ use gtk_layer_shell::{Edge, LayerShell};
 
 use crate::config::{self, Config};
 
-pub fn run(config: Config) -> glib::ExitCode {
+pub fn run(config: Config) -> Result<glib::ExitCode> {
     let app = gtk::Application::builder()
         .application_id("dev.github.arunim-io.apm")
         .build();
 
-    app.connect_startup(startup());
-    app.connect_activate(activate(config));
+    app.connect_startup(move |_| {
+        if let Some(display) = gdk::Display::default() {
+            let provider = gtk::CssProvider::new();
+            provider.load_from_path(Config::get_styles_path());
 
-    app.run()
-}
-
-fn startup() -> impl Fn(&gtk::Application) {
-    |_| {
-        let provider = gtk::CssProvider::new();
-        provider.load_from_path(Config::get_styles_path());
-
-        gtk::style_context_add_provider_for_display(
-            &gdk::Display::default().expect("Could not connect to a display."),
-            &provider,
-            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
-        );
-    }
-}
-
-fn activate(config: Config) -> impl Fn(&gtk::Application) {
-    move |app| {
+            gtk::style_context_add_provider_for_display(
+                &display,
+                &provider,
+                gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+            );
+        }
+    });
+    app.connect_activate(move |app| {
         let window = gtk::ApplicationWindow::new(app);
 
         window.init_layer_shell();
@@ -42,14 +35,16 @@ fn activate(config: Config) -> impl Fn(&gtk::Application) {
             window.set_anchor(edge, true);
         }
 
-        window.add_controller(get_controller(config.clone().buttons));
-        window.set_child(get_container(&config).as_ref());
+        window.add_controller(get_controller(&config.buttons));
+        window.set_child(Some(&get_container(&config)));
 
         window.present();
-    }
+    });
+
+    Ok(app.run())
 }
 
-fn get_container(config: &Config) -> Option<gtk::Box> {
+fn get_container(config: &Config) -> gtk::Box {
     let container = gtk::Box::builder()
         .name("container")
         .orientation(Orientation::Horizontal)
@@ -57,25 +52,29 @@ fn get_container(config: &Config) -> Option<gtk::Box> {
         .valign(Align::Center)
         .spacing(config.spacing.unwrap_or_else(|| 25))
         .build();
+    let ref buttons = config.buttons;
 
-    config.to_owned().buttons.into_iter().for_each(|button| {
+    buttons.into_iter().for_each(|button| {
         container.append(&button.get_widget(config.icon_size, config.icon_margin));
     });
 
-    return Some(container);
+    return container;
 }
 
-fn get_controller(buttons: Vec<config::Button>) -> gtk::EventControllerKey {
+fn get_controller(buttons: &Vec<config::Button>) -> gtk::EventControllerKey {
     let controller = gtk::EventControllerKey::new();
+    let buttons = buttons.to_owned();
 
     controller.connect_key_pressed(move |_, key, _, _| {
         if let Key::Escape = key {
             std::process::exit(0);
         }
 
-        buttons.to_owned().into_iter().for_each(|button| {
-            if button.clone().get_key() == key {
-                button.clone().exec_cmd();
+        buttons.to_owned().into_iter().for_each(|ref button| {
+            if let Ok(bkey) = button.get_key() {
+                if bkey == key {
+                    button.exec_cmd();
+                }
             }
         });
 
@@ -86,14 +85,15 @@ fn get_controller(buttons: Vec<config::Button>) -> gtk::EventControllerKey {
 }
 
 impl config::Button {
-    fn get_key(self) -> Key {
-        let err_msg = format!("Invalid key for {} button.", self.label);
-        let key = self.key.expect(&err_msg);
+    fn get_key(&self) -> Result<Key> {
+        let context = || format!("Invalid key for {} button.", self.label);
+        let key = self.to_owned().key.with_context(context)?;
 
-        return Key::from_name(key).expect(&err_msg);
+        Ok(Key::from_name(key).with_context(context)?)
     }
-    fn get_widget(self, icon_size: Option<i32>, icon_margin: Option<i32>) -> gtk::Box {
-        let label = self.label.as_str();
+
+    fn get_widget(&self, icon_size: Option<i32>, icon_margin: Option<i32>) -> gtk::Box {
+        let ref label = self.label;
         let container = gtk::Box::builder()
             .name(label)
             .orientation(Orientation::Vertical)

@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+color-eyre = "0.6.2"
 gtk = { version = "0.7.3", package = "gtk4", features = ["v4_12"] }
 gtk-layer-shell = { version = "0.2.0", package = "gtk4-layer-shell" }
 serde = { version = "1.0.195", features = ["derive"] }

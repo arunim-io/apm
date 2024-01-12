@@ -3,10 +3,14 @@ mod config;
 mod fs;
 mod gui;
 
-use config::Config;
+use color_eyre::eyre::Result;
 
-fn main() {
-    let config = Config::open();
+fn main() -> Result<()> {
+    color_eyre::install()?;
 
-    gui::run(config);
+    let config = config::Config::open()?;
+
+    gui::run(config)?;
+
+    Ok(())
 }
