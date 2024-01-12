@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 pub struct Config {
     pub buttons: Vec<Button>,
     pub spacing: Option<i32>,
+    pub icon_size: Option<i32>,
+    pub icon_margin: Option<i32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

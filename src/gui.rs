@@ -62,33 +62,33 @@ fn get_container(config: &Config) -> gtk::Box {
         .orientation(Orientation::Horizontal)
         .halign(Align::Center)
         .valign(Align::Center)
-        .spacing(25)
+        .spacing(config.spacing.unwrap_or_else(|| 25))
         .build();
 
-    config
-        .to_owned()
-        .buttons
-        .into_iter()
-        .for_each(|button| container.append(&button.get_widget()));
+    config.to_owned().buttons.into_iter().for_each(|button| {
+        container.append(&button.get_widget(config.icon_size, config.icon_margin));
+    });
 
     return container;
 }
 
 impl config::Button {
-    fn get_widget(self) -> gtk::Box {
+    fn get_widget(self, icon_size: Option<i32>, icon_margin: Option<i32>) -> gtk::Box {
         let label = self.label.as_str();
         let container = gtk::Box::builder()
             .name(label)
             .orientation(Orientation::Vertical)
             .spacing(10)
             .build();
+
+        let margin = icon_margin.unwrap_or_else(|| 10);
         let icon = gtk::Image::builder()
             .file(Config::get_file_path(&self.icon).to_string_lossy())
-            .margin_end(10)
-            .margin_top(10)
-            .margin_start(10)
-            .margin_bottom(10)
-            .pixel_size(50)
+            .margin_end(margin)
+            .margin_top(margin)
+            .margin_start(margin)
+            .margin_bottom(margin)
+            .pixel_size(icon_size.unwrap_or_else(|| 50))
             .build();
 
         let button = gtk::Button::builder().child(&icon).build();
