@@ -23,6 +23,6 @@ button {
 button:focus,
 button:active,
 button:hover {
-  background-color: gray;
   border: 5px solid green;
+  opacity: 0.75;
 }
