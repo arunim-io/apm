@@ -14,19 +14,25 @@ impl Config {
                 return file;
             }
         }
-        return Path::new(&format!("examples/{}", file_name)).to_path_buf();
+        let path = format!("{}/examples/{}", env!("CARGO_MANIFEST_DIR"), file_name);
+
+        return Path::new(&path).to_path_buf();
     }
 
     fn read_from_path(path: impl AsRef<Path>) -> Result<Self> {
         let file = std::fs::read_to_string(path)?;
-        return Ok(toml::from_str::<Self>(&file)?);
+        let data = toml::from_str::<Self>(&file)?;
+
+        Ok(data)
     }
 
     pub fn open() -> Result<Self> {
         let ref path = Self::get_file_path("config.toml");
-        let context = || format!("Unable to get config file from {}", path.display());
 
-        Ok(Self::read_from_path(path).with_context(context)?)
+        let context = || format!("Unable to get config file from {}", path.display());
+        let data = Self::read_from_path(path).with_context(context)?;
+
+        Ok(data)
     }
 
     pub fn get_styles_path() -> PathBuf {
