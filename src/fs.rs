@@ -1,22 +1,34 @@
-use color_eyre::eyre::{Context, Result};
+use color_eyre::eyre::{Context, OptionExt, Result};
 
-use crate::config::Config;
-use std::path::{Path, PathBuf};
+use crate::config::{Button, Config};
+use std::{
+    path::{Path, PathBuf},
+    process::exit,
+};
 
 impl Config {
     fn get_dir() -> Result<xdg::BaseDirectories> {
         return Ok(xdg::BaseDirectories::with_prefix("apm")?);
     }
 
-    pub fn get_file_path(file_name: &str) -> PathBuf {
-        if let Ok(path) = Self::get_dir() {
-            if let Some(file) = path.find_config_file(file_name) {
-                return file;
+    pub fn get_file_path(file_name: &str) -> Result<PathBuf> {
+        if let Ok(dir) = Self::get_dir() {
+            if let Some(path) = dir.find_config_file(file_name) {
+                return Ok(path);
             }
         }
-        let path = format!("{}/examples/{}", env!("CARGO_MANIFEST_DIR"), file_name);
+        let path = if cfg!(debug) {
+            format!("{}/examples/{}", env!("CARGO_MANIFEST_DIR"), file_name)
+        } else {
+            let exe_path =
+                std::env::current_exe().wrap_err("Unable to get path of current executable")?;
+            let path = exe_path
+                .parent()
+                .ok_or_eyre("Unable to get path of parent directory of current executable")?;
+            format!("{}/{}", path.display(), file_name)
+        };
 
-        return Path::new(&path).to_path_buf();
+        Ok(Path::new(&path).to_path_buf())
     }
 
     fn read_from_path(path: impl AsRef<Path>) -> Result<Self> {
@@ -27,15 +39,29 @@ impl Config {
     }
 
     pub fn open() -> Result<Self> {
-        let ref path = Self::get_file_path("config.toml");
+        let ref path = Self::get_file_path("config.toml")?;
 
         let context = || format!("Unable to get config file from {}", path.display());
-        let data = Self::read_from_path(path).with_context(context)?;
+        let data = Self::read_from_path(path).wrap_err_with(context)?;
 
         Ok(data)
     }
 
     pub fn get_styles_path() -> PathBuf {
-        return Self::get_file_path("styles.css");
+        if let Ok(path) = Self::get_file_path("styles.css") {
+            return path;
+        }
+        println!("Icon is missing. Exiting...");
+        exit(1);
+    }
+}
+
+impl Button {
+    pub fn get_icon_path(self) -> PathBuf {
+        if let Ok(path) = Config::get_file_path(&self.icon) {
+            return path;
+        }
+        println!("Icon is missing. Exiting...");
+        exit(1);
     }
 }

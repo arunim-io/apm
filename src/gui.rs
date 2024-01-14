@@ -24,6 +24,7 @@ pub fn run(config: Config) -> Result<glib::ExitCode> {
             );
         }
     });
+
     app.connect_activate(move |app| {
         let window = gtk::ApplicationWindow::new(app);
 
@@ -93,16 +94,16 @@ impl config::Button {
     }
 
     fn get_widget(&self, icon_size: Option<i32>, icon_margin: Option<i32>) -> gtk::Box {
-        let data = self.to_owned();
+        let label = self.label.as_str();
         let container = gtk::Box::builder()
-            .name(self.label.clone())
+            .name(label)
             .orientation(Orientation::Vertical)
             .spacing(10)
             .build();
 
         let margin = icon_margin.unwrap_or_else(|| 10);
         let icon = gtk::Image::builder()
-            .file(Config::get_file_path(&self.icon).to_string_lossy())
+            .file(self.to_owned().get_icon_path().to_string_lossy())
             .margin_end(margin)
             .margin_top(margin)
             .margin_start(margin)
@@ -112,10 +113,12 @@ impl config::Button {
 
         let button = gtk::Button::builder().child(&icon).build();
         button.add_css_class("circular");
+
+        let data = self.to_owned();
         button.connect_clicked(move |_| data.exec_cmd());
 
         container.append(&button);
-        container.append(&gtk::Label::new(Some(self.label.as_str())));
+        container.append(&gtk::Label::new(Some(label)));
 
         return container;
     }
