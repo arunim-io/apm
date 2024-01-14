@@ -17,12 +17,12 @@ window {
 }
 
 button {
-  background-color: white;
+  background-color: black;
 }
 
 button:focus,
 button:active,
 button:hover {
-  border: 5px solid green;
-  opacity: 0.75;
+  border: 2.5px solid green;
+  background-color: green;
 }

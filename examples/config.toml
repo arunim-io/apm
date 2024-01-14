@@ -4,11 +4,13 @@ spacing = 50
 icon = "icons/poweroff.svg"
 label = "Power Off"
 key = "p"
+cmd = "systemctl poweroff"
 
 [[buttons]]
 icon = "icons/reboot.svg"
 label = "Reboot"
 key = "r"
+cmd = "systemctl reboot"
 
 [[buttons]]
 icon = "icons/lock.svg"
@@ -19,8 +21,10 @@ key = "l"
 icon = "icons/sleep.svg"
 label = "Sleep"
 key = "s"
+cmd = "systemctl suspend"
 
 [[buttons]]
 icon = "icons/logout.svg"
 label = "Logout"
 key = "q"
+cmd = "loginctl terminate-user $USER"
