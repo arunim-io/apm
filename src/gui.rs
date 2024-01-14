@@ -93,9 +93,9 @@ impl config::Button {
     }
 
     fn get_widget(&self, icon_size: Option<i32>, icon_margin: Option<i32>) -> gtk::Box {
-        let ref label = self.label;
+        let data = self.to_owned();
         let container = gtk::Box::builder()
-            .name(label)
+            .name(self.label.clone())
             .orientation(Orientation::Vertical)
             .spacing(10)
             .build();
@@ -112,9 +112,10 @@ impl config::Button {
 
         let button = gtk::Button::builder().child(&icon).build();
         button.add_css_class("circular");
+        button.connect_clicked(move |_| data.exec_cmd());
 
         container.append(&button);
-        container.append(&gtk::Label::new(Some(label)));
+        container.append(&gtk::Label::new(Some(self.label.as_str())));
 
         return container;
     }
