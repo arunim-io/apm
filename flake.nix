@@ -25,7 +25,10 @@
         inherit (inputs'.fenix.packages.complete) cargo rustc rust-src;
       in
       {
-        packages.default = pkgs.callPackage ./default.nix { rustPlatform = pkgs.makeRustPlatform { inherit cargo rustc; }; };
+        packages = {
+          default = pkgs.callPackage ./default.nix { rustPlatform = pkgs.makeRustPlatform { inherit cargo rustc; }; };
+          apm = config.packages.default;
+        };
 
         devShells.default = with pkgs; mkShell {
           inputsFrom = [ config.packages.default ];
