@@ -2,7 +2,7 @@
 
 <!-- TODO: Add screenshot -->
 
-> apm is a simple power menu built with `gtk-layer-shell` and `gtk4`.
+> apm is a simple power menu built with [`gtk4-layer-shell`](https://github.com/wmww/gtk4-layer-shell) and [`gtk4`](https://docs.gtk.org/gtk4/).
 
 ## Running
 
@@ -55,7 +55,14 @@ Example:
 
 ## Configuration
 
-`apm` is configured using `toml` and is styled using `css`.
+`apm` is configured using `toml`. See [`examples/config.toml`](examples/config.toml) for reference.
+
+For styling, see the following links:
+
+- [CSS in GTK](https://docs.gtk.org/gtk4/css-overview.html)
+- [GTK CSS Properties](https://docs.gtk.org/gtk4/css-properties.html)
+
+See [`examples/styles.css`](examples/styles.css) for reference.
 
 ### Options
 
@@ -75,8 +82,7 @@ Example:
 | cmd   | `string` | 10            | The command to execute when the button is called. |
 | key   | `string` | []            | The key to use for activating the button.         |
 
-There is an example config in the [`examples/`](examples/) folder.
-
 ## License
 
 `apm` is [GNU GPLv3](LICENSE) licensed.
+
