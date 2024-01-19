@@ -23,10 +23,11 @@
     perSystem = { pkgs, system, config, inputs', ... }:
       let
         inherit (inputs'.fenix.packages.complete) cargo rustc rust-src;
+        rustPlatform = pkgs.makeRustPlatform { inherit cargo rustc; };
       in
       {
         packages = {
-          default = pkgs.callPackage ./default.nix { rustPlatform = pkgs.makeRustPlatform { inherit cargo rustc; }; };
+          default = pkgs.callPackage ./default.nix { inherit rustPlatform; };
           apm = config.packages.default;
         };
 

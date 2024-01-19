@@ -9,5 +9,6 @@ rustPlatform.buildRustPackage {
   cargoLock.lockFile = ./Cargo.lock;
   src = lib.cleanSource ./.;
 
-  buildInputs = [ pkg-config glib gtk4 gtk4-layer-shell ];
+  nativeBuildInputs = [ pkg-config ];
+  buildInputs = [ glib gtk4 gtk4-layer-shell ];
 }
