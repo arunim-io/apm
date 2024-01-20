@@ -32,7 +32,7 @@ pub fn run(config: Config) -> Result<glib::ExitCode> {
         window.set_layer(gtk_layer_shell::Layer::Overlay);
         window.set_exclusive_zone(-1);
         window.set_keyboard_mode(gtk_layer_shell::KeyboardMode::Exclusive);
-        for edge in vec![Edge::Top, Edge::Bottom, Edge::Left, Edge::Right] {
+        for edge in [Edge::Top, Edge::Bottom, Edge::Left, Edge::Right] {
             window.set_anchor(edge, true);
         }
 
@@ -51,15 +51,15 @@ fn get_container(config: &Config) -> gtk::Box {
         .orientation(Orientation::Horizontal)
         .halign(Align::Center)
         .valign(Align::Center)
-        .spacing(config.spacing.unwrap_or_else(|| 25))
+        .spacing(config.spacing.unwrap_or(25))
         .build();
-    let ref buttons = config.buttons;
+    let buttons = &config.buttons;
 
-    buttons.into_iter().for_each(|button| {
+    buttons.iter().for_each(|button| {
         container.append(&button.get_widget(config.icon_size, config.icon_margin));
     });
 
-    return container;
+    container
 }
 
 fn get_controller(buttons: &Vec<config::Button>) -> gtk::EventControllerKey {
@@ -71,7 +71,7 @@ fn get_controller(buttons: &Vec<config::Button>) -> gtk::EventControllerKey {
             std::process::exit(0);
         }
 
-        buttons.to_owned().into_iter().for_each(|ref button| {
+        buttons.iter().for_each(|button| {
             if let Ok(bkey) = button.get_key() {
                 if bkey == key {
                     button.exec_cmd();
@@ -82,7 +82,7 @@ fn get_controller(buttons: &Vec<config::Button>) -> gtk::EventControllerKey {
         glib::Propagation::Proceed
     });
 
-    return controller;
+    controller
 }
 
 impl config::Button {
@@ -90,7 +90,7 @@ impl config::Button {
         let context = || format!("Invalid key for {} button.", self.label);
         let key = self.to_owned().key.with_context(context)?;
 
-        Ok(Key::from_name(key).with_context(context)?)
+        Key::from_name(key).with_context(context)
     }
 
     fn get_widget(&self, icon_size: Option<i32>, icon_margin: Option<i32>) -> gtk::Box {
@@ -101,14 +101,14 @@ impl config::Button {
             .spacing(10)
             .build();
 
-        let margin = icon_margin.unwrap_or_else(|| 10);
+        let margin = icon_margin.unwrap_or(10);
         let icon = gtk::Image::builder()
             .file(self.to_owned().get_icon_path().to_string_lossy())
             .margin_end(margin)
             .margin_top(margin)
             .margin_start(margin)
             .margin_bottom(margin)
-            .pixel_size(icon_size.unwrap_or_else(|| 50))
+            .pixel_size(icon_size.unwrap_or(50))
             .build();
 
         let button = gtk::Button::builder().child(&icon).build();
@@ -120,6 +120,6 @@ impl config::Button {
         container.append(&button);
         container.append(&gtk::Label::new(Some(label)));
 
-        return container;
+        container
     }
 }

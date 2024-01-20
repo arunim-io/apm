@@ -8,7 +8,7 @@ use std::{
 
 impl Config {
     fn get_dir() -> Result<xdg::BaseDirectories> {
-        return Ok(xdg::BaseDirectories::with_prefix("apm")?);
+        Ok(xdg::BaseDirectories::with_prefix("apm")?)
     }
 
     pub fn get_file_path(file_name: &str) -> Result<PathBuf> {
@@ -39,7 +39,7 @@ impl Config {
     }
 
     pub fn open() -> Result<Self> {
-        let ref path = Self::get_file_path("config.toml")?;
+        let path = &(Self::get_file_path("config.toml")?);
 
         let context = || format!("Unable to get config file from {}", path.display());
         let data = Self::read_from_path(path).wrap_err_with(context)?;

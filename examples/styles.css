@@ -18,11 +18,11 @@ window {
 
 button {
   background-color: black;
+  border-width: 0;
 }
 
 button:focus,
 button:active,
 button:hover {
-  border-color: green;
   background-color: green;
 }
