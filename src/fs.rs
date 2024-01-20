@@ -17,7 +17,7 @@ impl Config {
                 return Ok(path);
             }
         }
-        let path = if cfg!(debug) {
+        let path = if cfg!(debug_assertions) {
             format!("{}/examples/{}", env!("CARGO_MANIFEST_DIR"), file_name)
         } else {
             let exe_path =

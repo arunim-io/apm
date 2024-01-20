@@ -13,7 +13,7 @@ window {
   color: white;
   padding: 50px;
   border: 1px solid white;
-  border-radius: 10px;
+  border-radius: 25px;
 }
 
 button {
@@ -23,6 +23,6 @@ button {
 button:focus,
 button:active,
 button:hover {
-  border: 2.5px solid green;
+  border-color: green;
   background-color: green;
 }
