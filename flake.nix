@@ -22,8 +22,8 @@
 
     perSystem = { pkgs, system, config, inputs', ... }:
       let
-        inherit (inputs'.fenix.packages.stable) cargo rustc rust-src;
-        rustPlatform = pkgs.makeRustPlatform { inherit cargo rustc; };
+        inherit (inputs'.fenix.packages.stable) toolchain rust-src;
+        rustPlatform = pkgs.makeRustPlatform { cargo = toolchain; rustc = toolchain; };
       in
       {
         packages = {
@@ -33,7 +33,9 @@
 
         devShells.default = with pkgs; mkShell {
           inputsFrom = [ config.packages.default ];
+          buildInputs = [ toolchain ];
           RUST_SRC_PATH = "${rust-src}/lib/rustlib/src/rust/library";
+          LD_LIBRARY_PATH = "${lib.makeLibraryPath [ wayland libxkbcommon ]}:$LD_LIBRARY_PATH";
         };
       };
   };

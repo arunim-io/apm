@@ -1,8 +1,12 @@
+mod gui;
+
 use color_eyre::eyre::Result;
+use gui::run_gui;
 
 fn main() -> Result<()> {
     color_eyre::install()?;
 
-    println!("Hello, World!");
+    run_gui()?;
+
     Ok(())
 }
