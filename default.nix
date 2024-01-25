@@ -1,4 +1,4 @@
-{ rustPlatform, lib, pkg-config, glib, gtk4, gtk4-layer-shell }:
+{ rustPlatform, lib }:
 let
   manifest = (lib.importTOML ./Cargo.toml).package;
 in
@@ -8,7 +8,4 @@ rustPlatform.buildRustPackage {
   pname = manifest.name;
   cargoLock.lockFile = ./Cargo.lock;
   src = lib.cleanSource ./.;
-
-  nativeBuildInputs = [ pkg-config ];
-  buildInputs = [ glib gtk4 gtk4-layer-shell ];
 }
